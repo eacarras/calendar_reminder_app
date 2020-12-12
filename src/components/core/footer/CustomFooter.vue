@@ -32,13 +32,16 @@
 
 <script>
   export default {
-    data: () => ({
-      icons: [
-        'mdi-github',
-        'mdi-linkedin',
-        'mdi-instagram',
-      ],
-    }),
+    // TODO: ADD REDIRECT TO LINK
+    data() {
+      return {
+        icons: [
+          'mdi-github',
+          'mdi-linkedin',
+          'mdi-instagram',
+        ],
+      };
+    },
   }
 </script>
 
