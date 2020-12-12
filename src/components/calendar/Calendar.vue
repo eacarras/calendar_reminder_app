@@ -10,17 +10,21 @@
       </v-col>
     </v-row>
     <v-row v-for="row in weeksNumber" :key="row" no-gutters>
-      <v-col class="calenday-container__days-number-container" v-for="dayNumber in getDaysOfTheWeek(row)" :key="dayNumber">
+      <v-col class="calenday-container__days-number-container" v-for="dayNumber in getDaysOfTheWeek(row)" :key="dayNumber.calendarDay">
         <v-card
           class="calenday-container__days-number-container-item card--not-radius"
           elevation="14"
           height="5.25rem"
         >
-          <p class="calenday-container__days-number-container-item__day">{{ dayNumber }}</p>
+          <p class="calenday-container__days-number-container-item__day">{{ dayNumber.calendarDay }}</p>
           <div class="calenday-container__days-number-container-item__reminders">
-            <v-btn @click="openModal(dayNumber)" small icon>
+            <v-btn @click="openModal(dayNumber.calendarDay)" small icon>
               <v-icon>mdi-playlist-plus</v-icon>
             </v-btn>
+            <v-card class="reminder-card--style" v-for="reminder in getCropReminders(dayNumber.remindersOfTheDay)" :key="reminder.hour">
+              {{ getFinalReminderText(reminder.title) }}
+            </v-card>
+            <p class="text--size" v-if="dayNumber.remindersOfTheDay.length > 2">You have {{ dayNumber.remindersOfTheDay.length - 2 }} more reminders</p>
           </div>
         </v-card>
       </v-col>
@@ -91,7 +95,19 @@ export default {
       }
     }
 
-    this.daysOfTheMonth = this.daysOfTheMonth.map(element => element.split('-')[0]);
+    this.daysOfTheMonth = this.daysOfTheMonth.map(element => {
+      const calendarDay = parseInt(element.split('-')[0]);
+      const remindersOfTheDay = this.preSavedReminders.length ? this.preSavedReminders.reduce((acc, reminder) => {
+        if (reminder.day === calendarDay) acc.push(reminder);
+
+        return acc;
+      }) : [];
+
+      return {
+        calendarDay,
+        remindersOfTheDay,
+      };
+    });
     this.weeksNumber = this.daysOfTheMonth.length / 7;
   },
   methods: {
@@ -108,6 +124,12 @@ export default {
     closeModal(val) {
       this.isAddingReminder = val;
     },
+    getCropReminders(arrayReminders) {
+      return arrayReminders.length >  2 ? arrayReminders.slice(0, 2) : arrayReminders;
+    },
+    getFinalReminderText(reminderTitle) {
+      return reminderTitle.length > 22 ? `${reminderTitle.substring(0, 20)} ..` : reminderTitle; 
+    }
   }
 }
 </script>
@@ -145,5 +167,14 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+}
+.reminder-card--style {
+  font-size: 12px;
+  padding: .15rem;
+  cursor: pointer;
+}
+.text--size {
+  font-size: 10px;
+  padding-top: .15rem;
 }
 </style>

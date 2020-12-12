@@ -25,11 +25,18 @@
                 :rules="rules"
               ></v-textarea>
             </v-col>
-            <v-col cols="12">
+            <v-col cols="6">
               <v-text-field
                 v-model="hour"
                 outlined
-                label="Hour ej: 19:20"  
+                label="Hour ej: 19:20"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                v-model="city"
+                outlined
+                label="City"
               ></v-text-field>
             </v-col>
           </v-row>
@@ -106,6 +113,7 @@ export default {
       title: '',
       hour: '',
       description: '',
+      city: '',
     };
   },
   computed: {
@@ -128,13 +136,13 @@ export default {
           this.title,
           this.description,
           this.dayOfReminder,
-          moment().format('MM'), //TODO: IMPROVE THIS
+          moment().format('MM'), //TODO: IMPROVE THIS TO SUPPORT MORE THAN CURRENT MONTH
           new Date().getFullYear(),
           this.hour,
-          'Guayaquil', //TODO IMPROVE THIS
+          this.city,
           this.color,
         );
-        console.log(reminder);
+        this.$store.dispatch('addRemminder', reminder);
         this.closeModal();
       }
     },
