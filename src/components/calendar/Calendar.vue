@@ -9,8 +9,8 @@
         >{{ day }}</v-card>
       </v-col>
     </v-row>
-    <v-row v-for="row in 4" :key="row" no-gutters>
-      <v-col class="calenday-container__days-number-container" v-for="dayNumber in days.length" :key="dayNumber">
+    <v-row v-for="row in weeksNumber" :key="row" no-gutters>
+      <v-col class="calenday-container__days-number-container" v-for="dayNumber in getDaysOfTheWeek(row)" :key="dayNumber">
         <v-card
           class="calenday-container__days-number-container-item card--not-radius"
           elevation="14"
@@ -22,7 +22,15 @@
 </template>
 
 <script>
+import moment from 'moment';
+
 export default {
+  props: {
+    daysWithNumber: {
+      type: Array,
+      required: true,
+    }
+  },
   data() {
     return {
       days: [
@@ -33,9 +41,46 @@ export default {
         'Thursday',
         'Friday',
         'Saturday',  
-      ]
+      ],
+      daysOfTheMonth: this.daysWithNumber,
+      weeksNumber: 0,
     };
   },
+  mounted() {
+    const indexFirstDay = this.days.indexOf(this.daysWithNumber[0].split('-')[1]);
+    const indexLastDay = this.days.indexOf(this.daysWithNumber[this.daysWithNumber.length - 1].split('-')[1]);
+
+    if(indexFirstDay > 0) {
+      const lastMonthDays = parseInt(moment(moment().format('YYYY-MM-DD')).subtract(1,'months').endOf('month').format('DD'));
+      let lastMonthDayNumber;
+      const tmpArray = [];
+
+      for(let day = 0; day < indexFirstDay; day++) {
+        lastMonthDayNumber = lastMonthDays - (indexFirstDay - day - 1);
+        tmpArray.push(`${lastMonthDayNumber}-${this.days[day]}`);
+      }
+
+      this.daysOfTheMonth = [...tmpArray, ...this.daysWithNumber]
+    }
+
+    if(indexLastDay < 6) {
+      let nextDayMonth = 1;
+      for(let day = indexLastDay; day < 6; day++) {
+        this.daysOfTheMonth.push(`${nextDayMonth++}-${this.days[day]}`);
+      }
+    }
+
+    this.daysOfTheMonth = this.daysOfTheMonth.map(element => element.split('-')[0]);
+    this.weeksNumber = this.daysOfTheMonth.length / 7;
+  },
+  methods: {
+    getDaysOfTheWeek(weekNumber) {
+      if (weekNumber === 1) return this.daysOfTheMonth.slice(0, 7);
+
+      const firstIndexSlice = (weekNumber - 1) * 7
+      return this.daysOfTheMonth.slice(firstIndexSlice, firstIndexSlice + 7);
+    }
+  }
 }
 </script>
 
