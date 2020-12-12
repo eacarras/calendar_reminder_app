@@ -30,6 +30,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import moment from 'moment';
 
 import AlertReminder from '@/components/alert/AlertReminder.vue';
@@ -61,6 +62,11 @@ export default {
       isAddingReminder: false,
     };
   },
+  computed: {
+    ...mapGetters('reminder', {
+      preSavedReminders: 'getReminders',
+    })
+  },
   mounted() {
     const indexFirstDay = this.days.indexOf(this.daysWithNumber[0].split('-')[1]);
     const indexLastDay = this.days.indexOf(this.daysWithNumber[this.daysWithNumber.length - 1].split('-')[1]);
@@ -87,11 +93,6 @@ export default {
 
     this.daysOfTheMonth = this.daysOfTheMonth.map(element => element.split('-')[0]);
     this.weeksNumber = this.daysOfTheMonth.length / 7;
-  },
-  watch: {
-    isAddingReminder() {
-      console.log(this.isAddingReminder);
-    },
   },
   methods: {
     getDaysOfTheWeek(weekNumber) {
