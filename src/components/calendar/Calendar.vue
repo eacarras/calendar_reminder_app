@@ -15,16 +15,29 @@
           class="calenday-container__days-number-container-item card--not-radius"
           elevation="14"
           height="5.25rem"
-        >{{ dayNumber }}</v-card>
+        >
+          <p class="calenday-container__days-number-container-item__day">{{ dayNumber }}</p>
+          <div class="calenday-container__days-number-container-item__reminders">
+            <v-btn @click="openModal(dayNumber)" small icon>
+              <v-icon>mdi-playlist-plus</v-icon>
+            </v-btn>
+          </div>
+        </v-card>
       </v-col>
     </v-row>
+    <alert-reminder v-show="isAddingReminder" @close-modal="closeModal" :dayOfReminder="daySelected"></alert-reminder>
   </v-container>
 </template>
 
 <script>
 import moment from 'moment';
 
+import AlertReminder from '@/components/alert/AlertReminder.vue';
+
 export default {
+  components: {
+    AlertReminder,
+  },
   props: {
     daysWithNumber: {
       type: Array,
@@ -44,6 +57,8 @@ export default {
       ],
       daysOfTheMonth: this.daysWithNumber,
       weeksNumber: 0,
+      daySelected: 0,
+      isAddingReminder: false,
     };
   },
   mounted() {
@@ -73,13 +88,25 @@ export default {
     this.daysOfTheMonth = this.daysOfTheMonth.map(element => element.split('-')[0]);
     this.weeksNumber = this.daysOfTheMonth.length / 7;
   },
+  watch: {
+    isAddingReminder() {
+      console.log(this.isAddingReminder);
+    },
+  },
   methods: {
     getDaysOfTheWeek(weekNumber) {
       if (weekNumber === 1) return this.daysOfTheMonth.slice(0, 7);
 
       const firstIndexSlice = (weekNumber - 1) * 7
       return this.daysOfTheMonth.slice(firstIndexSlice, firstIndexSlice + 7);
-    }
+    },
+    openModal(dayNumber) {
+      this.daySelected = parseInt(dayNumber);
+      this.isAddingReminder = true;
+    },
+    closeModal(val) {
+      this.isAddingReminder = val;
+    },
   }
 }
 </script>
@@ -102,10 +129,20 @@ export default {
   margin-top: .1rem;
 }
 .calenday-container__days-number-container-item {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr;
+  padding: 0 .25rem;
+  font-size: 20px;
+}
+.calenday-container__days-number-container-item__day {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 0 .25rem;
   font-size: 20px;
+}
+.calenday-container__days-number-container-item__reminders {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 </style>
