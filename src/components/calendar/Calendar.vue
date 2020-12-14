@@ -11,6 +11,7 @@
     </v-row>
     <v-row v-for="row in weeksNumber" :key="row" no-gutters>
       <v-col class="calenday-container__days-number-container" v-for="dayNumber in getDaysOfTheWeek(row)" :key="dayNumber.calendarDay">
+        <!-- TODO: REFACTOR THIS SECTION CREATING TWO DIFFERENT COMPONENTS -->
         <v-card
           :class="
             isFirstOrLastDay(dayNumber.calendarDay.split('-')[1])
