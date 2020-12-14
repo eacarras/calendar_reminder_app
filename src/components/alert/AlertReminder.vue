@@ -55,14 +55,14 @@
             @click="saveReminder"
             elevation="2"
             outlined
-          >Agregar</v-btn>
+          >{{ this.reminder ? 'Edit' : 'Add' }}</v-btn>
         </v-col>
         <v-col cols="6">
           <v-btn
             @click="closeModal"
             elevation="2"
             outlined
-          >Cancelar</v-btn>
+          >Cancel</v-btn>
         </v-col>
       </v-row>
     </v-card>
@@ -99,6 +99,21 @@ export default {
       type: Number,
       required: true,
     },
+    reminder: {
+      type: Object,
+      default: undefined,
+    },
+  },
+  watch: {
+    reminder() {
+      if (this.reminder) {
+        this.title = this.reminder.title,
+        this.hour = this.reminder.hour,
+        this.description = this.reminder.message,
+        this.city = this.reminder.city ? this.reminder.city : '';
+        this.color = this.reminder.color;
+      }
+    },
   },
   data() {
     return {
@@ -132,6 +147,9 @@ export default {
       else if(this.hour.trim().split(':').length != 2)
         this.activeSnackBar('Ingrese una hora en el formato hh:mm para continuar');
       else {
+        if (this.reminder) {
+          this.$store.dispatch('reminder/removeReminder', this.reminder);
+        }
         const reminder = new Reminder(
           this.title,
           this.description,
@@ -142,7 +160,7 @@ export default {
           this.city,
           this.color,
         );
-        this.$store.dispatch('addRemminder', reminder);
+        this.$store.dispatch('reminder/addRemminder', reminder);
         this.closeModal();
       }
     },

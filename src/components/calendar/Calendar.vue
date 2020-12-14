@@ -12,16 +12,34 @@
     <v-row v-for="row in weeksNumber" :key="row" no-gutters>
       <v-col class="calenday-container__days-number-container" v-for="dayNumber in getDaysOfTheWeek(row)" :key="dayNumber.calendarDay">
         <v-card
-          class="calenday-container__days-number-container-item card--not-radius"
+          :class="
+            isFirstOrLastDay(dayNumber.calendarDay.split('-')[1])
+              ? 'calenday-container__days-number-container-item card--not-radius'
+              : 'calenday-container__days-number-container-item card--not-radius--disable-bg'
+          "
           elevation="14"
           height="5.25rem"
         >
-          <p class="calenday-container__days-number-container-item__day">{{ dayNumber.calendarDay }}</p>
+          <p
+            :class="
+              dayNumber.calendarDay.split('-').length === 3
+                ? 'calenday-container__days-number-container-item__day text-color--disable'
+                : isFirstOrLastDay(dayNumber.calendarDay.split('-')[1])
+                  ? 'calenday-container__days-number-container-item__day'
+                  : 'calenday-container__days-number-container-item__day text-color--blue'
+            "
+          >{{ dayNumber.calendarDay.split('-')[0] }}</p>
           <div class="calenday-container__days-number-container-item__reminders">
-            <v-btn @click="openModal(dayNumber.calendarDay)" small icon>
+            <v-btn v-if="dayNumber.calendarDay.split('-').length < 3" @click="openModal(dayNumber.calendarDay)" small icon>
               <v-icon>mdi-playlist-plus</v-icon>
             </v-btn>
-            <v-card class="reminder-card--style" v-for="reminder in getCropReminders(dayNumber.remindersOfTheDay)" :key="reminder.hour">
+            <v-card
+              class="reminder-card--style"
+              @click="editReminder(reminder)"
+              v-for="reminder in getCropReminders(dayNumber.remindersOfTheDay)"
+              :key="reminder.hour"
+              :color="reminder.color"
+            >
               {{ getFinalReminderText(reminder.title) }}
             </v-card>
             <p class="text--size" v-if="dayNumber.remindersOfTheDay.length > 2">You have {{ dayNumber.remindersOfTheDay.length - 2 }} more reminders</p>
@@ -29,7 +47,12 @@
         </v-card>
       </v-col>
     </v-row>
-    <alert-reminder v-show="isAddingReminder" @close-modal="closeModal" :dayOfReminder="daySelected"></alert-reminder>
+    <alert-reminder
+      v-show="isAddingReminder"
+      @close-modal="closeModal"
+      :reminder="reminderSelected"
+      :dayOfReminder="daySelected"
+    ></alert-reminder>
   </v-container>
 </template>
 
@@ -58,18 +81,25 @@ export default {
         'Wednesday',
         'Thursday',
         'Friday',
-        'Saturday',  
+        'Saturday',
       ],
       daysOfTheMonth: this.daysWithNumber,
       weeksNumber: 0,
       daySelected: 0,
       isAddingReminder: false,
+      reminderSelected: null,
     };
   },
   computed: {
     ...mapGetters('reminder', {
       preSavedReminders: 'getReminders',
     })
+  },
+  watch: {
+    preSavedReminders() {
+      const newReminder = this.updateReminders();
+      this.daysOfTheMonth = newReminder;
+    },
   },
   mounted() {
     const indexFirstDay = this.days.indexOf(this.daysWithNumber[0].split('-')[1]);
@@ -82,7 +112,7 @@ export default {
 
       for(let day = 0; day < indexFirstDay; day++) {
         lastMonthDayNumber = lastMonthDays - (indexFirstDay - day - 1);
-        tmpArray.push(`${lastMonthDayNumber}-${this.days[day]}`);
+        tmpArray.push(`${lastMonthDayNumber}-${this.days[day]}-d`);
       }
 
       this.daysOfTheMonth = [...tmpArray, ...this.daysWithNumber]
@@ -91,23 +121,11 @@ export default {
     if(indexLastDay < 6) {
       let nextDayMonth = 1;
       for(let day = indexLastDay; day < 6; day++) {
-        this.daysOfTheMonth.push(`${nextDayMonth++}-${this.days[day]}`);
+        this.daysOfTheMonth.push(`${nextDayMonth++}-${this.days[day]}-d`);
       }
     }
 
-    this.daysOfTheMonth = this.daysOfTheMonth.map(element => {
-      const calendarDay = parseInt(element.split('-')[0]);
-      const remindersOfTheDay = this.preSavedReminders.length ? this.preSavedReminders.reduce((acc, reminder) => {
-        if (reminder.day === calendarDay) acc.push(reminder);
-
-        return acc;
-      }) : [];
-
-      return {
-        calendarDay,
-        remindersOfTheDay,
-      };
-    });
+    this.daysOfTheMonth = this.updateReminders();
     this.weeksNumber = this.daysOfTheMonth.length / 7;
   },
   methods: {
@@ -117,11 +135,36 @@ export default {
       const firstIndexSlice = (weekNumber - 1) * 7
       return this.daysOfTheMonth.slice(firstIndexSlice, firstIndexSlice + 7);
     },
+    editReminder(reminderToEdit) {
+      this.reminderSelected = reminderToEdit;
+      this.isAddingReminder = true;
+    },
+    updateReminders() {
+      return this.daysOfTheMonth.map(element => {
+        const havePreSavedData = typeof element !== typeof '';
+        const splitData = havePreSavedData ? element.calendarDay.split('-') : element.split('-');
+        const calendarDay = parseInt(splitData[0]);
+        const remindersOfTheDay = this.preSavedReminders.length ? this.preSavedReminders.reduce((acc, reminder) => {
+          if (reminder.day === calendarDay && splitData.length < 3) acc.push(reminder);
+
+          return acc;
+        }, []) : [];
+
+        return {
+          calendarDay: havePreSavedData ? element.calendarDay : element,
+          remindersOfTheDay,
+        };
+      });
+    },
+    isFirstOrLastDay(day) {
+      return this.days.indexOf(day) > 0 && this.days.indexOf(day) < 6;
+    },
     openModal(dayNumber) {
       this.daySelected = parseInt(dayNumber);
       this.isAddingReminder = true;
     },
     closeModal(val) {
+      this.reminderSelected = null;
       this.isAddingReminder = val;
     },
     getCropReminders(arrayReminders) {
@@ -148,6 +191,10 @@ export default {
 .card--not-radius {
   border-radius: 0%;
 }
+.card--not-radius--disable-bg {
+  border-radius: 0%;
+  background-color: #D8D8D8;
+}
 .calenday-container__days-number-container {
   margin-top: .1rem;
 }
@@ -156,6 +203,12 @@ export default {
   grid-template-columns: 1.75rem 1fr;
   padding: 0 .25rem;
   font-size: 20px;
+}
+.text-color--blue {
+  color: #3393FF;
+}
+.text-color--disable {
+  color: #B0B0B0;
 }
 .calenday-container__days-number-container-item__day {
   display: flex;
