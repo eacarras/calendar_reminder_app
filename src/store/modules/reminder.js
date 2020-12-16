@@ -13,13 +13,22 @@ const actions = {
   addRemminder({ commit }, reminder) {
     commit('setReminder', reminder);
   },
+  removeReminder({ commit }, reminder) {
+    commit('deleteReminder', reminder);
+  },
 }
 
 // Mutations
 const mutations = {
   setReminder(state, reminder) {
     state.reminders.push(reminder);
-  }
+  },
+  deleteReminder(state, reminder) {
+    const index = state.reminders.findIndex(e => e.title === reminder.title);
+    console.log(index, state.reminders);
+    state.reminders.splice(index, 1);
+    console.log(state.reminders);
+  },
 }
 
 export default {
