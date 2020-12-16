@@ -174,6 +174,8 @@ export default {
     },
     resetData() {
       this.title = '';
+      this.hour = '';
+      this.city = '';
       this.description = '';
       this.color = '#FFF';
     },

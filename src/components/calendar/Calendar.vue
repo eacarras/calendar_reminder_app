@@ -38,12 +38,12 @@
               class="reminder-card--style"
               @click="editReminder(reminder)"
               v-for="reminder in getCropReminders(dayNumber.remindersOfTheDay)"
-              :key="reminder.hour"
+              :key="reminder.title + reminder.hour"
               :color="reminder.color"
             >
               {{ getFinalReminderText(reminder.title) }}
             </v-card>
-            <p class="text--size" v-if="dayNumber.remindersOfTheDay.length > 2">You have {{ dayNumber.remindersOfTheDay.length - 2 }} more reminders</p>
+            <p class="cursor-dialog text--size" @click="openDialog(dayNumber.remindersOfTheDay)" v-if="dayNumber.remindersOfTheDay.length > 2">You have {{ dayNumber.remindersOfTheDay.length - 2 }} more reminders</p>
           </div>
         </v-card>
       </v-col>
@@ -54,6 +54,11 @@
       :reminder="reminderSelected"
       :dayOfReminder="daySelected"
     ></alert-reminder>
+    <alert-informative
+      v-show="dialog"
+      @close-modal="closeInformativeDialog"
+      :dataDialog="dataDialog"
+    ></alert-informative>
   </v-container>
 </template>
 
@@ -62,10 +67,12 @@ import { mapGetters } from 'vuex';
 import moment from 'moment';
 
 import AlertReminder from '@/components/alert/AlertReminder.vue';
+import AlertInformative from '@/components/alert/AlertInformative.vue';
 
 export default {
   components: {
     AlertReminder,
+    AlertInformative,
   },
   props: {
     daysWithNumber: {
@@ -89,6 +96,8 @@ export default {
       daySelected: 0,
       isAddingReminder: false,
       reminderSelected: null,
+      dialog: false,
+      dataDialog: '',
     };
   },
   computed: {
@@ -136,6 +145,10 @@ export default {
       const firstIndexSlice = (weekNumber - 1) * 7
       return this.daysOfTheMonth.slice(firstIndexSlice, firstIndexSlice + 7);
     },
+    openDialog(array) {
+      this.dataDialog = array.slice(2, ).map(e => e.title).join('\n');
+      this.dialog = true;
+    },
     editReminder(reminderToEdit) {
       this.reminderSelected = reminderToEdit;
       this.isAddingReminder = true;
@@ -163,6 +176,9 @@ export default {
     openModal(dayNumber) {
       this.daySelected = parseInt(dayNumber);
       this.isAddingReminder = true;
+    },
+    closeInformativeDialog(val) {
+      this.dialog = val;
     },
     closeModal(val) {
       this.reminderSelected = null;
@@ -226,6 +242,9 @@ export default {
   font-size: 12px;
   padding: .15rem;
   cursor: pointer;
+}
+.cursor-dialog {
+  cursor:pointer;
 }
 .text--size {
   font-size: 10px;
