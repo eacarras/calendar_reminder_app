@@ -25,9 +25,7 @@ const mutations = {
   },
   deleteReminder(state, reminder) {
     const index = state.reminders.findIndex(e => e.title === reminder.title);
-    console.log(index, state.reminders);
     state.reminders.splice(index, 1);
-    console.log(state.reminders);
   },
 }
 
