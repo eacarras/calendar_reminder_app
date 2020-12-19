@@ -1,91 +1,95 @@
 <template>
-  <v-container class="alert-container">
-    <v-card class="alert-container__content" :style="backgroundColorAlert">
-      <v-row class="title--color">
-        <v-col cols="12"><h2>New Reminder</h2></v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="12">
-          <v-text-field
-            v-model="title"
-            class="btn--long-size"
-            outlined
-            label="Title"
-          ></v-text-field>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col class="col--size" cols="8">
-          <v-row>
-            <v-col cols="12">
-              <v-textarea
-                v-model="description"
-                label="Description"
-                solo
-                :rules="rules"
-              ></v-textarea>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                v-model="hour"
-                outlined
-                label="Hour ej: 19:20"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                v-model="city"
-                outlined
-                label="City"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </v-col>
-        <v-col class="row--padding" cols="4">
-          <v-color-picker
-            class="picker--size"
-            v-model="color"
-            hide-inputs
-          ></v-color-picker>
-        </v-col>
-      </v-row>
-      <v-row>
-        <v-col cols="6">
+  <v-app>
+    <v-container class="alert-container">
+      <v-card class="alert-container__content" :style="backgroundColorAlert">
+        <v-row class="title--color">
+          <v-col cols="12"><h2>New Reminder</h2></v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <v-text-field
+              v-model="title"
+              class="btn--long-size"
+              outlined
+              label="Title"
+            ></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col class="col--size" cols="8">
+            <v-row>
+              <v-col cols="12">
+                <v-textarea
+                  v-model="description"
+                  label="Description"
+                  solo
+                  :rules="rules"
+                ></v-textarea>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  v-model="hour"
+                  outlined
+                  label="Hour ej: 19:20"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="6">
+                <v-text-field
+                  v-model="city"
+                  outlined
+                  label="City"
+                ></v-text-field>
+              </v-col>
+            </v-row>
+          </v-col>
+          <v-col class="row--padding" cols="4">
+            <v-row justify="space-around">
+              <v-color-picker
+                class="picker--size"
+                v-model="color"
+                hide-inputs
+              ></v-color-picker>
+            </v-row>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="6">
+            <v-btn
+              @click="saveReminder"
+              elevation="2"
+              outlined
+            >{{ this.reminder ? 'Edit' : 'Add' }}</v-btn>
+          </v-col>
+          <v-col cols="6">
+            <v-btn
+              @click="closeModal"
+              elevation="2"
+              outlined
+            >Cancel</v-btn>
+          </v-col>
+        </v-row>
+      </v-card>
+      <!-- ALERT WHEN USER NOT ENTER DATA PROPERTY -->
+      <v-snackbar
+        v-model="snackbar"
+        :timeout="timeout"
+        top
+        right
+      >
+        {{ snackbarText }}
+        <template v-slot:action="{ attrs }">
           <v-btn
-            @click="saveReminder"
-            elevation="2"
-            outlined
-          >{{ this.reminder ? 'Edit' : 'Add' }}</v-btn>
-        </v-col>
-        <v-col cols="6">
-          <v-btn
-            @click="closeModal"
-            elevation="2"
-            outlined
-          >Cancel</v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
-    <!-- ALERT WHEN USER NOT ENTER DATA PROPERTY -->
-    <v-snackbar
-      v-model="snackbar"
-      :timeout="timeout"
-      top
-      right
-    >
-      {{ snackbarText }}
-      <template v-slot:action="{ attrs }">
-        <v-btn
-          color="pink"
-          text
-          v-bind="attrs"
-          @click="snackbar = false"
-        >
-          Got it!
-        </v-btn>
-      </template>
-    </v-snackbar>
-  </v-container>
+            color="pink"
+            text
+            v-bind="attrs"
+            @click="snackbar = false"
+          >
+            Got it!
+          </v-btn>
+        </template>
+      </v-snackbar>
+    </v-container>
+  </v-app>
 </template>
 
 <script>
@@ -141,11 +145,11 @@ export default {
   methods: {
     saveReminder() {
       if (!this.title.length)
-        this.activeSnackBar('Ingrese un titulo para continuar');
+        this.activeSnackBar('Please, enter an title to continue...');
       else if(!this.description.length || this.description.length > 30)
-        this.activeSnackBar('Ingrese una descripcion para continuar');
+        this.activeSnackBar('Please, enter a description to continue...');
       else if(this.hour.trim().split(':').length != 2)
-        this.activeSnackBar('Ingrese una hora en el formato hh:mm para continuar');
+        this.activeSnackBar('Please enter and hour in the format hh:mm to continue..');
       else {
         if (this.reminder) {
           this.$store.dispatch('reminder/removeReminder', this.reminder);
@@ -153,7 +157,7 @@ export default {
         const reminder = new Reminder(
           this.title,
           this.description,
-          this.dayOfReminder,
+          this.reminder ? this.reminder.day : this.dayOfReminder,
           moment().format('MM'), //TODO: IMPROVE THIS TO SUPPORT MORE THAN CURRENT MONTH
           new Date().getFullYear(),
           this.hour,

@@ -6,8 +6,8 @@
         </v-card-title>
         <v-divider></v-divider>
         
-        <v-card-text>
-          {{ dataDialog }}
+        <v-card-text v-for="reminder in dataDialog" :key="reminder.title">
+          {{ reminder.title }} at {{ reminder.hour }} in {{ reminder.city }}
         </v-card-text>
 
         <v-divider></v-divider>
@@ -30,7 +30,7 @@
 export default {
   props: {
     dataDialog: {
-      type: String,
+      type: Array,
       required: true,
     },
   },
@@ -63,11 +63,9 @@ export default {
   height: min-content;
   padding: 0 .5rem;
 }
-.alert-container__content {
-  background-color: #D9EFC1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.text--align {
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 .title--color {
   background-color: var(--background-color);
@@ -80,5 +78,8 @@ export default {
 }
 .row {
   width: 100%;
+}
+.v-card__text {
+  padding: 7px;
 }
 </style>
