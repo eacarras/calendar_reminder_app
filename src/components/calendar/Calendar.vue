@@ -97,7 +97,7 @@ export default {
       isAddingReminder: false,
       reminderSelected: null,
       dialog: false,
-      dataDialog: '',
+      dataDialog: [],
     };
   },
   computed: {
@@ -146,7 +146,7 @@ export default {
       return this.daysOfTheMonth.slice(firstIndexSlice, firstIndexSlice + 7);
     },
     openDialog(array) {
-      this.dataDialog = array.slice(2, ).map(e => e.title).join('\n');
+      this.dataDialog = array.slice(2, );
       this.dialog = true;
     },
     editReminder(reminderToEdit) {
