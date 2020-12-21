@@ -47,6 +47,7 @@
               <v-color-picker
                 class="picker--size"
                 v-model="color"
+                :value="color"
                 hide-inputs
               ></v-color-picker>
             </v-row>
